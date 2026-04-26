@@ -1,24 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shared/theme/app_colors.dart';
+import '../providers/projects_provider.dart';
+import '../widgets/project_card.dart';
+import '../widgets/progress_painter.dart'; // Importamos tu nuevo dibujo
+import '../../shared/routes/app_routes.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Obtenemos la lista de tus temas de estudio desde el Provider
+    final projects = ref.watch(projectsProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: CustomScrollView(
+          physics: const BouncingScrollPhysics(), // Scroll suave estilo joven
           slivers: [
-            // 1. Header con Avatar y Saludo
-            const SliverToBoxAdapter(
+            // 1. Header: Saludo y Avatar
+            SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(24.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
+                    const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
@@ -29,76 +38,93 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          'Tus proyectos',
+                          'Mis Estudios',
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
+                            letterSpacing: -0.5,
                           ),
                         ),
                       ],
                     ),
-                    CircleAvatar(
-                      radius: 25,
-                      backgroundColor: AppColors.progressBackground,
-                      child: Icon(Icons.person, color: AppColors.textPrimary),
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.primaryRed,
+                          width: 2,
+                        ),
+                      ),
+                      child: const CircleAvatar(
+                        radius: 25,
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.person, color: AppColors.textPrimary),
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
 
-            // 2. El Banner Gris de Progreso
+            // 2. Banner de Progreso con el Custom Painter
             SliverToBoxAdapter(
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: const Color(
-                    0xFF2D2D2D,
-                  ), // El gris oscuro de tu prototipo
+                  color: const Color(0xFF2D2D2D), // Gris oscuro pro
                   borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primaryRed.withOpacity(0.2),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    // Aquí irá tu Custom Painter del círculo rojo más adelante
+                    // IMPLEMENTACIÓN DEL CUSTOM PAINTER
                     Stack(
                       alignment: Alignment.center,
                       children: [
-                        SizedBox(
-                          width: 80,
-                          height: 80,
-                          child: CircularProgressIndicator(
-                            value: 0.75,
-                            strokeWidth: 8,
+                        CustomPaint(
+                          size: const Size(70, 70),
+                          painter: ProgressPainter(
+                            progress: 0.75, // 75% de avance
                             color: AppColors.primaryRed,
-                            backgroundColor: Colors.white24,
                           ),
                         ),
-                        Text(
+                        const Text(
                           '75%',
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
+                            fontSize: 16,
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(width: 20),
-                    Expanded(
+                    const SizedBox(width: 25),
+                    const Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Casi terminas',
+                            '¡Vas muy bien!',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
+                          SizedBox(height: 4),
                           Text(
-                            'Has completado 12 tareas esta semana.',
-                            style: TextStyle(color: Colors.white70),
+                            'Has completado 12 temas esta semana.',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
                           ),
                         ],
                       ),
@@ -108,7 +134,39 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            // 3. Grid de Proyectos (Próximo paso)
+            // Espaciador entre banner y grid
+            const SliverToBoxAdapter(child: SizedBox(height: 32)),
+
+            // 3. Grid de Proyectos (Tus temas de estudio)
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 20,
+                  crossAxisSpacing: 20,
+                  childAspectRatio: 0.85,
+                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final project = projects[index];
+                  return ProjectCard(
+                    project: project,
+                    onTap: () {
+                      // Aquí conectaremos la ruta de detalle en el siguiente paso
+                      debugPrint('Navegando a: ${project.name}');
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.details,
+                        arguments: project,
+                      );
+                    },
+                  );
+                }, childCount: projects.length),
+              ),
+            ),
+
+            // Espacio final para que el scroll no quede pegado abajo
+            const SliverToBoxAdapter(child: SizedBox(height: 40)),
           ],
         ),
       ),
