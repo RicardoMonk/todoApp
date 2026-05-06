@@ -15,7 +15,7 @@ class ProgressPainter extends CustomPainter {
 
     // 1. Dibujar el fondo (el círculo gris tenue)
     final backgroundPaint = Paint()
-      ..color = Colors.white.withOpacity(0.1)
+      ..color = Colors.white.withValues(alpha: 0.1)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
 
@@ -30,7 +30,7 @@ class ProgressPainter extends CustomPainter {
       ..strokeWidth = strokeWidth;
 
     // Calculamos el ángulo: -pi/2 es para que empiece arriba (las 12 en punto)
-    double arcAngle = 2 * pi * progress;
+    final arcAngle = 2 * pi * progress;
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
       -pi / 2,
