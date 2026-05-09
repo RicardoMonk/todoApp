@@ -5,6 +5,7 @@ import '../providers/projects_provider.dart';
 import '../widgets/project_card.dart';
 import '../widgets/progress_painter.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
+import '../../shared/routes/app_routes.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -261,6 +262,8 @@ class HomeScreen extends ConsumerWidget {
                 mainAxisSpacing: 20,
                 crossAxisSpacing: 20,
                 childAspectRatio: 0.85,
+                // Añadimos este delay para que el "tap" normal funcione mejor
+                dragStartDelay: const Duration(milliseconds: 200),
                 onReorder: (oldIndex, newIndex) {
                   ref
                       .read(projectsProvider.notifier)
@@ -268,13 +271,13 @@ class HomeScreen extends ConsumerWidget {
                 },
                 children: projects.map((project) {
                   return ProjectCard(
-                    key: ValueKey(project.id),
+                    key: ValueKey(project.id), // Obligatorio para el reorden
                     project: project,
                     onTap: () {
-                      // Aseguramos que la navegación use los argumentos correctos
+                      // Usamos la ruta oficial de tu AppRoutes
                       Navigator.pushNamed(
                         context,
-                        '/details',
+                        AppRoutes.details,
                         arguments: project,
                       );
                     },

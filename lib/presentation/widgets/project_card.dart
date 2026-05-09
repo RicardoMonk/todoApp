@@ -70,6 +70,7 @@ class ProjectCard extends ConsumerWidget {
           color: Colors.white,
           child: GestureDetector(
             onTap: onTap,
+            behavior: HitTestBehavior.opaque,
             child: Container(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -123,6 +124,26 @@ class ProjectCard extends ConsumerWidget {
                                 ),
                                 SizedBox(width: 10),
                                 Text('Eliminar'),
+                              ],
+                            ),
+                          ),
+
+                          const PopupMenuItem(
+                            enabled:
+                                false, // La mantenemos deshabilitada como estaba
+                            value: 'hide',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.visibility_off_outlined,
+                                  color: Colors.grey,
+                                  size: 20,
+                                ),
+                                SizedBox(width: 10),
+                                Text(
+                                  'Ocultar',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
                               ],
                             ),
                           ),
